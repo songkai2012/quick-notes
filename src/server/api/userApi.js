@@ -1,18 +1,26 @@
-const models = require('../db/db')
+// const models = require('../db/dbConfig')
+const mysql = require('mysql')
+const dbConfig = require('../db/dbConfig')
+
+const pool = mysql.createPool(dbConfig.mysql)
 const express = require('express')
 const router = express.Router()
-const mysql = require('mysql')
+// const mysql = require('mysql')
 const $sql = require('../db/sqlMap')
 
-const conn = mysql.createConnection(models.mysql)
-
-conn.connect()
-
+// const conn = mysql.createConnection(models.mysql)
+let conn = null
+pool.getConnection((err, connection) => {
+    if (err) throw err
+    conn = connection
+    // conn.connect()
+})
+console.log(conn)
 const jsonWrite = (res, ret) => {
     if (typeof ret === 'undefined') {
         res.send('err')
     } else {
-        console.log(ret)
+        // console.log(ret)
         res.send(ret)
     }
 }
@@ -31,7 +39,7 @@ const dateStr = (str) => new Date(str.slice(0, 7))
  */
 router.post('/addUser', (req, res) => {
     const sql = $sql.user.add
-    const params = req.body
+    const params = req.params
     console.log(params)
     console.log(params.birth)
     conn.query(sql, [params.name, params.account, params.password, params.checkPass, params.email, params.phone, params.card, dateStr(params.birth), params.sex], (err, result) => {
@@ -47,7 +55,7 @@ router.post('/addUser', (req, res) => {
  */
 router.post('/login', (req, res) => {
     let sqlName = $sql.user.select_name
-    const params = req.body
+    const params = req.params
     console.log(params)
 
     if (params.name) {
@@ -73,13 +81,13 @@ router.post('/login', (req, res) => {
 /**
  * 获取用户信息
  */
-router.get('/getUser', (req, res) => {
+router.get('/user/:name', (req, res) => {
     let sqlName = $sql.user.select_name
-    const params = req.body
+    const params = req.params
 
     if (params.name) {
         sqlName += `where username = '${params.name}'`
-        console.log(sqlName)
+        // console.log(sqlName)
     }
 
     conn.query(sqlName, params.name, (err, result) => {
@@ -99,7 +107,7 @@ router.get('/getUser', (req, res) => {
  */
 router.post('/update', (req, res) => {
     let sqlUpdate = $sql.user.update_user
-    const params = req.body
+    const params = req.params
 
     if (params.id) {
         sqlUpdate += `email = '${params.email}',phone = '${params.phone}',card = '${params.card}',birth = '${params.birth}',sex = '${params.sex}' where id = ${params.id};`
@@ -119,7 +127,7 @@ router.post('/update', (req, res) => {
  */
 router.post('/modifyPassword', (req, res) => {
     let sqlUpdate = $sql.user.update_user
-    const params = req.body
+    const params = req.params
 
     if (params.id) {
         sqlUpdate += `password = '${params.password}',repeatPass = '${params.checkPass}' where id = ${params.id};`

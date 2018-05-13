@@ -1,8 +1,8 @@
 /**
  * 用户模型
  */
-const pool = require('@/server/db/index.js')
-const userMap = require('@/mapping/user.js')
+const conn = require('../../server/db/index.js')
+const userMap = require('../../mapping/user.js')
 const dateStr = (str) => new Date(str.slice(0, 7))
 
 module.exports = {
@@ -12,10 +12,17 @@ module.exports = {
     addUser: (req, res, cb) => {
         const sql = userMap.user.add
         const params = req.body
+        console.log(req.body)
 
-        pool.query(sql, [params.name, params.account, params.password, params.checkPass, params.email, params.phone, params.card, dateStr(params.birth), params.sex], (err, result) => {
-            cb(err, result)
-            // conn.release()
+        if (!params.name) {
+            return cb(undefined, 0)
+        }
+
+        conn(pool => {
+            pool.query(sql, [params.name, params.account, params.password, params.checkPass, params.email, params.phone, params.card, dateStr(params.birth), params.sex], (err, result) => {
+                cb(err, result)
+                // conn.release()
+            })
         })
     },
     /**
@@ -29,8 +36,10 @@ module.exports = {
             sqlName += `where username = '${params.name}'`
         }
 
-        pool.query(sqlName, params.name, (err, result) => {
-            cb(err, result)
+        conn(pool => {
+            pool.query(sqlName, params.name, (err, result) => {
+                cb(err, result)
+            })
         })
     },
     /**
@@ -38,14 +47,16 @@ module.exports = {
      */
     getUsers: (req, res, cb) => {
         let sqlName = userMap.user.select_name
-        const params = req.body
+        const params = req.params
 
         if (params.name) {
             sqlName += `where username = '${params.name}'`
         }
 
-        pool.query(sqlName, params.name, (err, result) => {
-            cb(err, result)
+        conn(pool => {
+            pool.query(sqlName, params.name, (err, result) => {
+                cb(err, result)
+            })
         })
     },
     /**
@@ -62,8 +73,10 @@ module.exports = {
             sqlUpdate += `email = '${params.email}',phone = '${params.phone}',card = '${params.card}',birth = '${params.birth}',sex = '${params.sex}' where id = ${params.id};`
         }
 
-        pool.query(sqlUpdate, params.id, (err, result) => {
-            cb(err, result)
+        conn(pool => {
+            pool.query(sqlUpdate, params.id, (err, result) => {
+                cb(err, result)
+            })
         })
     },
     /**
@@ -77,8 +90,10 @@ module.exports = {
             sqlUpdate += `password = '${params.password}',repeatPass = '${params.checkPass}' where id = ${params.id};`
         }
 
-        pool.query(sqlUpdate, params.id, (err, result) => {
-            cb(err, result)
+        conn(pool => {
+            pool.query(sqlUpdate, params.id, (err, result) => {
+                cb(err, result)
+            })
         })
     }
 }

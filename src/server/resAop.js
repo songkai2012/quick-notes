@@ -1,9 +1,8 @@
 const jsonWrite = (res, result) => {
-    if (typeof ret === 'undefined') {
-        res.send('err')
+    if (typeof result === 'undefined' || result === 0) {
+        res.status(404).send('err')
     } else {
-        console.log(result)
-        res.send(result)
+        res.status(200).send(result)
     }
 }
 

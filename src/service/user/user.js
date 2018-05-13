@@ -1,5 +1,5 @@
-const userModel = require('@/model/user/user.js')
-const jsonWrite = require('@/server/resAop.js')
+const userModel = require('../../models/user/user.js')
+const jsonWrite = require('../../server/resAop.js')
 
 module.exports = {
     // 增加用户
@@ -34,6 +34,7 @@ module.exports = {
     // 查找用户
     getUsers: (req, res) => {
         userModel.getUsers(req, res, (err, result) => {
+            console.log(result)
             if (err) return jsonWrite(res, -1)
 
             if (result[0] === undefined) {
@@ -48,7 +49,7 @@ module.exports = {
         userModel.update(req, res, (err, result) => {
             if (err) return jsonWrite(res, -1)
 
-            if (result.attectedRows === undefined) {
+            if (result.affectedRows === undefined) {
                 return jsonWrite(res, {msg: '更新失败，请联系管理员', code: '1'})
             } else {
                 return jsonWrite(res, {msg: 'success', code: '0'})

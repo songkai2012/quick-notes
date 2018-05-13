@@ -4,7 +4,14 @@
 const mysql = require('mysql')
 const dbConfig = require('./dbConfig')
 
-mysql.createPool(dbConfig.mysql).getConnection((err, conn) => {
-    if (err) throw err
-    module.exports = conn
-})
+const pool = mysql.createPool(dbConfig.mysql)
+
+module.exports = function (cb) {
+    pool.getConnection((err, connection) => {
+        if (err) throw err
+        else {
+            cb(connection)
+        }
+        connection.release()
+    })
+}
